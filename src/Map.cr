@@ -11,10 +11,10 @@ module Tiled
     property tilewidth : UInt32
     property tileheight : UInt32
     property hexsidelength : UInt32 = 0
-    property staggeraxis : String = "x"
-    property staggerindex : String = "even"
-    property parallaxoriginx : Int32 = 0
-    property parallaxoriginy : Int32 = 0
+    property staggeraxis : String = ""
+    property staggerindex : String = ""
+    property parallaxoriginx : Float32 = 0.0
+    property parallaxoriginy : Float32 = 0.0
     property backgroundcolor : String = "#00000000"
     property nextlayerid : UInt32
     property nextobjectid : UInt32
@@ -27,5 +27,12 @@ module Tiled
     property array_objectgroup : Array(ObjectGroup) = [] of ObjectGroup
     property array_imagelayer : Array(ImageLayer) = [] of ImageLayer
     property array_group : Array(Group) = [] of Group
+
+    def initialize(@version, @tiledversion, @width, @height, @tilewidth, @tileheight, @nextlayerid, @nextobjectid)
+    end
+
+    def self.parse_from_node(map_xml : XML::Node)
+      Tiled.parse_basic_properties(map_xml, Tiled::Map)
+    end
   end
 end

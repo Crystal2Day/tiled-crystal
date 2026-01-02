@@ -1,6 +1,6 @@
 module Tiled
-  class ObjectGroup
-    class TiledObject # Renamed to avoid issues
+  struct ObjectGroup
+    struct Object
       property id : UInt32 = 0
       property name : String = ""
       property type : String = ""
@@ -21,21 +21,27 @@ module Tiled
       property text : Text? = nil
     end
 
-    class Ellipse
+    struct Ellipse
     end
 
-    class Point
+    struct Point
     end
 
-    class Polygon
+    struct Polygon
       property points : String
+
+      def initialize(@points)
+      end
     end
 
-    class Polyline
+    struct Polyline
       property points : String
+
+      def initialize(@points)
+      end
     end
 
-    class Text
+    struct Text
       property fontfamily : String = "sans-serif"
       property pixelsize : UInt32 = 16
       property wrap : Bool = false
@@ -68,6 +74,6 @@ module Tiled
 
     property properties : Properties? = nil
     
-    property array_object : Array(TiledObject) = [] of TiledObject
+    property array_object : Array(Object) = [] of Object
   end
 end

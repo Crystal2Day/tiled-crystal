@@ -1,5 +1,5 @@
 module Tiled
-  class Group
+  struct Group
     property id : UInt32 = 0
     property name : String = ""
     property class : String = ""

@@ -1,23 +1,26 @@
 module Tiled
-  class Layer
-    class Data
+  struct Layer
+    struct Data
       property encoding : String = ""
       property compression : String = ""
 
       property array_tile : Array(Tile) = [] of Tile
-      property array_chunk : Array(Chunk) = [] of Chunk
+      property array_chunk : Array(Chunk) = [] of Layer::Chunk
     end
 
-    class Chunk
+    struct Chunk
       property x : Int32
       property y : Int32
       property width : UInt32
       property height : UInt32
 
       property array_tile : Array(Tile) = [] of Tile
+
+      def initialize(@x, @y, @width, @height)
+      end
     end
 
-    class Tile
+    struct Tile
       property gid : UInt32 = 0
     end
 
@@ -38,5 +41,8 @@ module Tiled
 
     property properties : Properties? = nil
     property data : Data? = nil
+
+    def initialize(@width, @height)
+    end
   end
 end
