@@ -10,11 +10,25 @@ require "./Properties.cr"
 require "./Template.cr"
 
 module Tiled
+  macro cast_to_appropriate_value(str, type_name)
+    {% if type_name.stringify == "String" %}
+      {{str}}
+    {% elsif type_name.stringify == "UInt32" %}
+      {{str}}.to_u32
+    {% elsif type_name.stringify == "Int32" %}
+      {{str}}.to_i32
+    {% elsif type_name.stringify == "Float32" %}
+      {{str}}.to_f32
+    {% elsif type_name.stringify == "Bool" %}
+      ({{str}} != "0" ? true : false)
+    {% end %}
+  end
+
   macro parse_basic_properties(node, class_name)
     puts "Parsing {{class_name}}"
     {% for ivar in class_name.resolve.instance_vars %}
-      if {{node}}[{{ivar.name.stringify}}]? 
-        puts "> Given: {{ivar.name}} ({{ivar.type}}) -> #{{{node}}[{{ivar.name.stringify}}].inspect}"
+      if {{node}}[{{ivar.name.stringify}}]?
+        puts "> Given: {{ivar.name}} ({{ivar.type}}) -> #{Tiled.cast_to_appropriate_value({{node}}[{{ivar.name.stringify}}], {{ivar.type}}).inspect}"
       else
         {% if ivar.has_default_value? %}
           "> Default: {{ivar.name}} ({{ivar.type}}) -> #{({{ivar.default_value}}).inspect}"
@@ -27,8 +41,8 @@ module Tiled
 
     # TODO: Process arrays and objects
     {{node}}.children.each do |child_node|
-      next if child_node.text?
-      puts "Child node: #{child_node.name}"
+      next if child_node.text?  # Exclude fake nodes
+      puts "> Child node: #{child_node.name}"
     end
   end
 
