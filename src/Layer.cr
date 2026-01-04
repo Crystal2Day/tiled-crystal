@@ -4,11 +4,16 @@ module Tiled
       property encoding : String = ""
       property compression : String = ""
 
+      property content : Array(UInt32) = [] of UInt32
+
       property array_tile : Array(Tile) = [] of Tile
       property array_chunk : Array(Chunk) = [] of Layer::Chunk
 
       def self.parse_from_node(node : XML::Node)
-        return Tiled::Macros.parse_node_of_class(node, Tiled::Layer::Data)
+        # NOTE: Special handling for data blocks specifically
+        new_data = Tiled::Macros.parse_node_of_class(node, Tiled::Layer::Data)
+        new_data.content = node.content.split(",").map {|str| str.to_u32}
+        return new_data
       end
     end
 

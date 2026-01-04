@@ -29,10 +29,7 @@ module Tiled
       property width : UInt32 = 0
       property height : UInt32 = 0
 
-      property data : Layer::Data
-
-      def initialize(@data)
-      end
+      property data : Layer::Data? = nil
 
       def self.parse_from_node(node : XML::Node)
         return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::Image)
@@ -78,6 +75,11 @@ module Tiled
       property y : UInt32 = 0
       property width : UInt32 = 0
       property height : UInt32 = 0
+
+      property properties : Properties? = nil
+      property image : Image? = nil
+      property objectgroup : ObjectGroup? = nil
+      property animation : Animation? = nil
 
       def initialize(@id)
       end
