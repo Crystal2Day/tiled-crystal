@@ -1,166 +1,143 @@
 require "xml"
 
+require "./Map.cr"
+require "./Tileset.cr"
+require "./Layer.cr"
+require "./ObjectGroup.cr"
+require "./ImageLayer.cr"
+require "./Group.cr"
+require "./Properties.cr"
+require "./Template.cr"
+
 module Tiled
-  struct ParsedTileset
-    property image_file : String = ""
-    property name : String
-    property tile_width : UInt32
-    property tile_height : UInt32
-    property tile_count : UInt32
-    property tile_properties : Array(TileProperties)
-    property tile_animations : Array(Array(TileAnimationFrame)) = [] of Array(TileAnimationFrame)
-  
-    def initialize(@name : String, @tile_width : UInt32, @tile_height : UInt32, @tile_count : UInt32)
-      @tile_properties = Array(TileProperties).new(size: @tile_count) {TileProperties.new}
-      @tile_animations = Array(Array(TileAnimationFrame)).new(size: @tile_count) {Array(TileAnimationFrame).new}
-    end
-  end
-  
-  struct ParsedMap
-    property width : UInt32
-    property height : UInt32
-    property tile_width : UInt32
-    property tile_height : UInt32
-    property tileset_file : String = ""
-    property layers = [] of ParsedLayer
-  
-    def initialize(@width : UInt32, @height : UInt32, @tile_width : UInt32, @tile_height : UInt32)
-    end
-  end
-  
-  struct ParsedLayer
-    property width : UInt32
-    property height : UInt32
-    property name : String
-    property content : Array(UInt32)
-  
-    def initialize(@width : UInt32, @height : UInt32, @name : String)
-      @content = Array(UInt32).new(initial_capacity: @width * @height)
-    end
-  end
-  
-  struct TileProperties
-    property properties = {} of String => Bool | Int32 | String | Float32
-  
-    def initialize
-    end
-  
-    def add(name, value)
-      @properties[name] = value
-    end
-  end
-
-  struct TileAnimationFrame
-    property tile_id : UInt32
-    property duration : UInt32
-
-    def initialize(@tile_id : UInt32, @duration : UInt32)
-    end
-  end
-  
-  def self.parse_tileset(filename : String)
-    File.open(filename, "r") do |f|
-      parser = XML.parse(f)
-      tileset_xml = parser.first_element_child
-
-      if tileset_xml && tileset_xml.name == "tileset"
-        tileset = ParsedTileset.new(tileset_xml["name"], tileset_xml["tilewidth"].to_u32, tileset_xml["tileheight"].to_u32, tileset_xml["tilecount"].to_u32)
-
-        tileset_xml.children.each do |node|
-          next if node.text?
-
-          case node.name
-          when "image" then
-            tileset.image_file = node["source"]
-          when "tile" then
-            tile_id = node["id"].to_u32
-            
-            node.children.each do |node_child|
-              if node_child.name == "properties"
-                properties = node_child
-                properties.children.each do |prop|
-                  next if prop.text?
-
-                  prop_name = prop["name"]
-                  prop_type = prop["type"]?
-                  prop_value = prop["value"]
-
-                  case prop_type
-                  when nil
-                    tileset.tile_properties[tile_id].add(prop_name, prop_value)
-                  when "bool"
-                    tileset.tile_properties[tile_id].add(prop_name, prop_value == "true" ? true : false)
-                  when "int"
-                    tileset.tile_properties[tile_id].add(prop_name, prop_value.to_i32)
-                  when "float"
-                    tileset.tile_properties[tile_id].add(prop_name, prop_value.to_f32)
-                  else
-                    puts "Property type not supported: #{prop_type}"
-                  end
-                end
-              elsif node_child.name == "animation"
-                animations = node_child
-                animations.children.each do |anim|
-                  next if anim.text?
-                  tileset.tile_animations[tile_id].push(TileAnimationFrame.new(anim["tileid"].to_u32, anim["duration"].to_u32))
-                end
-              end
-            end
-          else
-            puts "Node name not supported: #{node.name}"
-          end
-        end
-        return tileset
-      else
-        raise "ERROR"
-      end
-    end
-  end
-
-  def self.parse_map(filename : String)
+  def self.parse_map_from_file(filename : String)
     File.open(filename, "r") do |f|
       parser = XML.parse(f)
       map_xml = parser.first_element_child
 
       if map_xml && map_xml.name == "map"
-        if map_xml["renderorder"] != "right-down" || map_xml["orientation"] != "orthogonal" || map_xml["infinite"] != "0"
-          raise "ERROR"
-        end
-
-        # TODO: Tile sizes MAY differ from tileset values, implement this in Crystal2Day at some point
-        map = ParsedMap.new(map_xml["width"].to_u32, map_xml["height"].to_u32, map_xml["tilewidth"].to_u32, map_xml["tileheight"].to_u32)
-        
-        map_xml.children.each do |node|
-          next if node.text?
-
-          case node.name
-          when "tileset" then
-            map.tileset_file = node["source"]
-          when "layer" then
-            layer = ParsedLayer.new(node["width"].to_u32, node["height"].to_u32, node["name"])
-
-            node.children.each do |layer_node|
-              next if layer_node.text?
-
-              case layer_node.name
-              when "data" then
-                elements = layer_node.content.gsub("\n", "").split(",")
-                elements.each do |element|
-                  layer.content.push element.to_u32
-                end
-
-                map.layers.push(layer)
-              else
-                puts "Node name not supported: #{layer_node.name}"
-              end
-            end
-          else
-            puts "Node name not supported: #{node.name}"
-          end
-        end
-        return map
+        return Tiled::Map.parse_from_node(map_xml)
       else
-        raise "ERROR"
+        raise "Content of file #{filename} is not a map"
+      end
+    end
+  end
+
+   def self.parse_tileset_from_file(filename : String)
+    File.open(filename, "r") do |f|
+      parser = XML.parse(f)
+      tileset_xml = parser.first_element_child
+
+      if tileset_xml && tileset_xml.name == "tileset"
+        return Tiled::Tileset.parse_from_node(tileset_xml)
+      else
+        raise "Content of file #{filename} is not a tileset"
+      end
+    end
+  end
+
+  module Macros
+    macro parse_node_of_class(node, class_name)
+      # Main routine to parse an XML node into a class
+      %new_obj = Tiled::Macros.generate_object_with_default_args({{node}}, {{class_name}})
+      Tiled::Macros.fill_object_with_basic_properties(%new_obj, {{node}}, {{class_name}})
+      Tiled::Macros.fill_arrays_and_optionals(%new_obj, {{node}}, {{class_name}})
+      %new_obj
+    end
+
+    macro cast_string_to_appropriate_value(str, type_name)
+      # Cast the string of an XML node into a trivial value
+      {% if type_name.stringify == "String" %}
+        {{str}}
+      {% elsif type_name.stringify == "UInt32" %}
+        {{str}}.to_u32
+      {% elsif type_name.stringify == "Int32" %}
+        {{str}}.to_i32
+      {% elsif type_name.stringify == "Float32" %}
+        {{str}}.to_f32
+      {% elsif type_name.stringify == "Bool" %}
+        ({{str}} != "0" ? true : false)
+      {% else %}
+        # We actually need these special cases so the macro interpreter doesn't complain
+        raise "This should not happen (Error code 1)"
+      {% end %}
+    end
+
+    macro cast_node_to_appropriate_value(node, type_name)
+      # General routine to cast an XML node into a value
+      {% if type_name.stringify.starts_with?("Array") %}
+        raise "This should not happen (Error code 2)"
+      {% elsif type_name.stringify == "String" || type_name.stringify == "UInt32" || type_name.stringify == "Int32" || type_name.stringify == "Float32" || type_name.stringify == "Bool" %}
+        # Handle trivial types
+        Tiled::Macros.cast_string_to_appropriate_value({{node}}.content, {{type_name}})
+      {% elsif type_name.is_a?(Expressions) %}
+        # Treat nilable unions properly
+        {% reduced_type_name = type_name.expressions[0].receiver %}
+        {% if reduced_type_name.stringify == "String" || reduced_type_name.stringify == "UInt32" || reduced_type_name.stringify == "Int32" || reduced_type_name.stringify == "Float32" || reduced_type_name.stringify == "Bool" %}
+          Tiled::Macros.cast_string_to_appropriate_value({{node}}.content, {{reduced_type_name}})
+        {% elsif reduced_type_name.stringify.starts_with?("Array") %}
+          raise "This should not happen (Error code 3)"
+        {% else %}
+          {{reduced_type_name}}.parse_from_node({{node}})
+        {% end %}
+      {% else %}
+        # We could technically call the current routine once more, but that would lead to infinite recursion, so the actual method is safer
+        {{type_name}}.parse_from_node({{node}})
+      {% end %}
+    end
+
+    macro generate_object_with_default_args(node, class_name)
+      # Initialize the object with its required arguments
+      {{class_name}}.new(
+        {% for ivar in class_name.resolve.instance_vars %}
+          {% unless ivar.has_default_value? %}
+            Tiled::Macros.cast_string_to_appropriate_value({{node}}[{{ivar.name.stringify}}], {{ivar.type}}),
+          {% end %}
+        {% end %}
+      )
+    end
+
+    macro fill_object_with_basic_properties(obj, node, class_name)
+      # Add the optional basic properties
+      {% for ivar in class_name.resolve.instance_vars %}
+        {% if ivar.has_default_value? && !ivar.name.starts_with?("array_") %}
+          if {{node}}[{{ivar.name.stringify}}]?
+            {{obj}}.{{ivar.name}} = Tiled::Macros.cast_string_to_appropriate_value({{node}}[{{ivar.name.stringify}}], {{ivar.type}})
+          else
+            {{obj}}.{{ivar.name}} = ({{ivar.default_value}})
+          end
+        {% end %}
+      {% end %}
+    end
+
+    macro fill_arrays_and_optionals(obj, node, class_name)
+      # Finally, add optional child nodes and arrays
+      {% components = [] of StringLiteral %}
+      {% component_types = {} of StringLiteral => TypeNode %}
+
+      {% for ivar in class_name.resolve.instance_vars %}
+        {% if ivar.name.starts_with?("array_") %}
+          {% component_name = ivar.name.gsub(/array_/, "") %}
+          {% components.push(component_name.stringify) %}
+          {% component_types[component_name.stringify] = ivar.type.type_vars[0] %}
+        {% end %}
+      {% end %}
+
+      {{node}}.children.each do |%child_node|
+        # Check all potential array properties
+        {% for component_name in components %}
+          if %child_node.name == {{component_name}}
+            %new_value = Tiled::Macros.cast_node_to_appropriate_value(%child_node, {{component_types[component_name]}})
+            {{obj}}.array_{{component_name.id}}.push(%new_value)
+          end
+        {% end %}
+
+        # Check all potential nilable properties
+        {% for ivar in class_name.resolve.instance_vars %}
+          if %child_node.name == {{ivar.name.stringify}}
+            {{obj}}.{{ivar.name}} = Tiled::Macros.cast_node_to_appropriate_value(%child_node, {{ivar.type}})
+          end
+        {% end %}
       end
     end
   end
