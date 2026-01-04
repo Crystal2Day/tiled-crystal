@@ -6,7 +6,7 @@ To run it, just include it into your project (it has no dependencies beyond the 
 and call the following functions (with the paths to the respective files):
 
 ```crystal
-tileset = Tiled.parse_tileset("ExampleTileset.tsx")
+tileset = Tiled.parse_tileset_from_file("ExampleTileset.tsx")
 
-map = Tiled.parse_map("ExampleMap.tmx")
+map = Tiled.parse_map_from_file("ExampleMap.tmx")
 ```
