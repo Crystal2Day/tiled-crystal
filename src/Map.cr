@@ -31,8 +31,8 @@ module Tiled
     def initialize(@version, @tiledversion, @width, @height, @tilewidth, @tileheight, @nextlayerid, @nextobjectid)
     end
 
-    def self.parse_from_node(map_xml : XML::Node)
-      Tiled.parse_basic_properties(map_xml, Tiled::Map)
+    def self.parse_from_node(node : XML::Node)
+      return Tiled::Macros.parse_node_of_class(node, Tiled::Map)
     end
   end
 end

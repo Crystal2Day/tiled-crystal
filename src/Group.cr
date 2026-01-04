@@ -17,5 +17,9 @@ module Tiled
     property array_objectgroup : Array(ObjectGroup) = [] of ObjectGroup
     property array_imagelayer : Array(ImageLayer) = [] of ImageLayer
     property array_group : Array(Group) = [] of Group
+
+    def self.parse_from_node(node : XML::Node)
+      return Tiled::Macros.parse_node_of_class(node, Tiled::Group)
+    end
   end
 end

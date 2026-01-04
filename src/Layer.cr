@@ -6,6 +6,10 @@ module Tiled
 
       property array_tile : Array(Tile) = [] of Tile
       property array_chunk : Array(Chunk) = [] of Layer::Chunk
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Layer::Data)
+      end
     end
 
     struct Chunk
@@ -18,10 +22,18 @@ module Tiled
 
       def initialize(@x, @y, @width, @height)
       end
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Layer::Chunk)
+      end
     end
 
     struct Tile
       property gid : UInt32 = 0
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Layer::Tile)
+      end
     end
 
     property id : UInt32 = 0
@@ -43,6 +55,10 @@ module Tiled
     property data : Data? = nil
 
     def initialize(@width, @height)
+    end
+
+    def self.parse_from_node(node : XML::Node)
+      return Tiled::Macros.parse_node_of_class(node, Tiled::Layer)
     end
   end
 end

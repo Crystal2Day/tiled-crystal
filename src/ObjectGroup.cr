@@ -19,12 +19,22 @@ module Tiled
       property polygon : Polygon? = nil
       property polyline : Polyline? = nil
       property text : Text? = nil
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::ObjectGroup::Object)
+      end
     end
 
     struct Ellipse
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::ObjectGroup::Ellipse)
+      end
     end
 
     struct Point
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::ObjectGroup::Point)
+      end
     end
 
     struct Polygon
@@ -32,12 +42,20 @@ module Tiled
 
       def initialize(@points)
       end
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::ObjectGroup::Polygon)
+      end
     end
 
     struct Polyline
       property points : String
 
       def initialize(@points)
+      end
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::ObjectGroup::Polyline)
       end
     end
 
@@ -53,6 +71,10 @@ module Tiled
       property kerning : Bool = true
       property halign : String = "left"
       property valign : String = "top"
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::ObjectGroup::Text)
+      end
     end
 
     property id : UInt32 = 0
@@ -75,5 +97,9 @@ module Tiled
     property properties : Properties? = nil
     
     property array_object : Array(Object) = [] of Object
+
+    def self.parse_from_node(node : XML::Node)
+      return Tiled::Macros.parse_node_of_class(node, Tiled::ObjectGroup)
+    end
   end
 end

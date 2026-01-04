@@ -15,5 +15,9 @@ module Tiled
 
     property properties : Properties? = nil
     property image : Tileset::Image? = nil
+
+    def self.parse_from_node(node : XML::Node)
+      return Tiled::Macros.parse_node_of_class(node, Tiled::ImageLayer)
+    end
   end
 end

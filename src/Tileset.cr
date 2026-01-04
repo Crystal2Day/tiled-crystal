@@ -3,6 +3,10 @@ module Tiled
     struct TileOffset
       property x : Int32 = 0
       property y : Int32 = 0
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::TileOffset)
+      end
     end
 
     struct Grid
@@ -11,6 +15,10 @@ module Tiled
       property height : UInt32
 
       def initialize(@width, @height)
+      end
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::Grid)
       end
     end
     
@@ -25,6 +33,10 @@ module Tiled
 
       def initialize(@data)
       end
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::Image)
+      end
     end
 
     struct Transformations
@@ -32,6 +44,10 @@ module Tiled
       property vflip : Bool = false
       property rotate : Bool = false
       property preferuntransformed : Bool = false
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::Transformations)
+      end
     end
 
     struct Tile
@@ -42,9 +58,17 @@ module Tiled
 
           def initialize(@tileid, @duration)
           end
+
+          def self.parse_from_node(node : XML::Node)
+            return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::Tile::Animation::Frame)
+          end
         end
 
         property array_frame : Array(Frame) = [] of Frame
+
+        def self.parse_from_node(node : XML::Node)
+          return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::Tile::Animation)
+        end
       end
   
       property id : UInt32
@@ -56,6 +80,10 @@ module Tiled
       property height : UInt32 = 0
 
       def initialize(@id)
+      end
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::Tile)
       end
     end
 
@@ -71,6 +99,10 @@ module Tiled
 
         def initialize(@name, @tile)
         end
+
+        def self.parse_from_node(node : XML::Node)
+          return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::WangSets::WangSet)
+        end
       end
 
       struct WangColor
@@ -82,6 +114,10 @@ module Tiled
 
         def initialize(@name, @color, @tile)
         end
+
+        def self.parse_from_node(node : XML::Node)
+          return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::WangSets::WangColor)
+        end
       end
 
       struct WangTile
@@ -90,21 +126,29 @@ module Tiled
 
         def initialize(@tileid, @wangid)
         end
+
+        def self.parse_from_node(node : XML::Node)
+          return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::WangSets::WangTile)
+        end
       end
 
       property array_wangset : Array(WangSet) = [] of WangSets::WangSet
+
+      def self.parse_from_node(node : XML::Node)
+        return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset::WangSets)
+      end
     end
 
-    property firstgid : UInt32
+    property firstgid : UInt32 = 0
     property source : String = ""
-    property name : String
+    property name : String = ""
     property class : String = ""
-    property tilewidth : UInt32
-    property tileheight : UInt32
+    property tilewidth : UInt32 = 0
+    property tileheight : UInt32 = 0
     property spacing : UInt32 = 0
     property margin : UInt32 = 0
-    property tilecount : UInt32
-    property columns : UInt32
+    property tilecount : UInt32 = 0
+    property columns : UInt32 = 0
     property objectalignment : String = "unspecified"
     property tilerendersize : String = "tile"
     property fillmode : String = "stretch"
@@ -118,11 +162,8 @@ module Tiled
 
     property array_tile : Array(Tile) = [] of Tile
 
-    def initialize(@firstgid, @name, @tilewidth, @tileheight, @tilecount, @columns)
-    end
-
-    def self.parse_from_node(map_xml : XML::Node)
-      Tiled.parse_basic_properties(map_xml, Tiled::Tileset)
+    def self.parse_from_node(node : XML::Node)
+      return Tiled::Macros.parse_node_of_class(node, Tiled::Tileset)
     end
   end
 end
