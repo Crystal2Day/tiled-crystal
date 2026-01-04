@@ -56,7 +56,7 @@ module Tiled
       {% elsif type_name.stringify == "Float32" %}
         {{str}}.to_f32
       {% elsif type_name.stringify == "Bool" %}
-        ({{str}} != "0" ? true : false)
+        ({{str}} != "0" && {{str}} != "false" ? true : false)
       {% else %}
         # We actually need these special cases so the macro interpreter doesn't complain
         raise "This should not happen (Error code 1)"
