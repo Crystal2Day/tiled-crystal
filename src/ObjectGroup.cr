@@ -9,7 +9,7 @@ module Tiled
       property width : UInt32 = 0
       property height : UInt32 = 0
       property rotation : Float32 = 0.0
-      property gid : UInt32? = nil
+      property gid : UInt32 = 0
       property visible : Bool = true
       property template : String = ""
 
